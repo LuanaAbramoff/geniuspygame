@@ -36,6 +36,7 @@ class Teclas(pygame.sprite.Sprite):
         self.coratual = DESLIGADO
         self.image = self.images[self.coratual]
         self.rect = self.image.get_rect()
+        self.teclas = []
 
     def update(self):
         self.image = self.images[self.coratual]
@@ -49,13 +50,6 @@ def sorteiasequencia(x):
     listatecla=[]
     while i<x:
         tecla = random.randint(1,4)
-        if tecla == 1:
-           
-        elif tecla== 2:
-        
-        elif tecla== 3:
-        
-        else:
         listatecla.append(tecla)
     return listatecla
 
@@ -73,8 +67,11 @@ while game:
             game=False
             pygame.quit()
             sys.exit()
-        if evento.type==pygame.KEYDOWN:
-            
+
+    tecla1.teclas=sorteiasequencia(1)
+        # if evento.type==pygame.KEYDOWN:
+        #     if evento.key==pygame.K_UP:
+        #         tecla1.coratual=VERMELHO
     
     all_sprites.update()
     surf.fill([255,255,255])
