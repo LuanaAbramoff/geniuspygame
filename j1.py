@@ -1,6 +1,7 @@
 import sys
 import pygame 
 import random
+import time
  
 pygame.init()
 
@@ -27,7 +28,8 @@ assets['verde'] = pygame.transform.scale(assets['verde'], (850,600))
 DESLIGADO=0
 VERMELHO=1
 AMARELO=2
-
+VERDE = 4
+AZUL = 3
 # define as classes do jogo (as quatro teclas)
 class Teclas(pygame.sprite.Sprite):
     def __init__(self):
@@ -52,10 +54,27 @@ def sorteiasequencia(x):
         tecla = random.randint(1,4)
         listatecla.append(tecla)
     return listatecla
+a = sorteiasequencia(1)
+#definindo a primeira tecla
+class Tecla2 (pygame.sprite.Sprite):
+    def __init__(self):
+        if a[0]==1:
+            self.image = self.images[VERMELHO]
+        elif a[0]==2:
+            self.image = self.images[AMARELO]
+        elif a[0]==3:
+            self.image =self.images[AZUL]
+        else:
+            self.image = self.images[VERDE]
+       
+    def uptade(self):
+        self.rect = self.image.get_rect()
 
 tecla1 = Teclas()
 all_sprites = pygame.sprite.Group()
 all_sprites.add(tecla1)
+tecla2 = Tecla2()
+all_sprites.add(tecla2)
 
 # loop principal
 game=True
