@@ -20,9 +20,9 @@ assets['vermelho'] = pygame.image.load('assets/imagens/teclavermelhaligada.png')
 assets['vermelho'] = pygame.transform.scale(assets['vermelho'], (850,600))
 assets['amarelo'] = pygame.image.load('assets/imagens/teclaamarelaligada.png').convert_alpha()
 assets['amarelo'] = pygame.transform.scale(assets['amarelo'], (850,600))
-assets['azul'] = pygame.image.load('assets/imagens/teclaazuligada.png').convert_alpha()
+assets['azul'] = pygame.image.load('assets/imagens/teclaazulligada.png').convert_alpha()
 assets['azul'] = pygame.transform.scale(assets['azul'], (850,600)) 
-assets['verde'] = pygame.image.load('assets/imagens/teclaverdeigada.png').convert_alpha()
+assets['verde'] = pygame.image.load('assets/imagens/teclaverdeligada.png').convert_alpha()
 assets['verde'] = pygame.transform.scale(assets['verde'], (850,600))
 
 DESLIGADO=0
@@ -56,25 +56,50 @@ def sorteiasequencia(x):
     return listatecla
 a = sorteiasequencia(1)
 #definindo a primeira tecla
-class Tecla2 (pygame.sprite.Sprite):
-    def __init__(self):
-        if a[0]==1:
-            self.image = self.images[VERMELHO]
-        elif a[0]==2:
-            self.image = self.images[AMARELO]
-        elif a[0]==3:
-            self.image =self.images[AZUL]
-        else:
-            self.image = self.images[VERDE]
-       
-    def uptade(self):
+#recebe a lista tecla
+class Animacao (pygame.sprite.Sprite):
+    def __init__(self, assets, listatecla):
+        pygame.sprite.Sprite.__init__(self)
+        listaanimacao = []
+        if len(listatecla)==1:
+            listaanimacao.append(assets['desligado'])
+        for i in listatecla:
+            if listatecla[i]== 1:
+                listaanimacao.append(assets['vermelho'])
+            elif listatecla[i]==2:
+                listaanimacao.append(assets['amarelo'])
+            elif listatecla[i]==3:
+                listaanimacao.append(assets['azul'])
+            else:
+                listaanimacao.append(assets['verde'])
+        self.teclas_animacao = listaanimacao
+        self.frame = 0
+        self.image = self.teclas_animacao[self.frame]
         self.rect = self.image.get_rect()
+
+        self.last_update = pygame.time.get_ticks()
+        self.frame_ticks = 5000
+    def uptade(self):
+        now = pygame.time.get_ticks()
+        elapsed_ticks = now - self.last_update
+
+        if elapsed_ticks > self.frame_ticks:
+            self.last_update = now
+
+            self.frame += 1
+
+            if self.frame == len(self.explosion_anim):
+                self.kill()
+            else:
+                center = self.rect.center
+                self.image = self.explosion_anim[self.frame]
+                self.rect = self.image.get_rect()
+
 
 tecla1 = Teclas()
 all_sprites = pygame.sprite.Group()
 all_sprites.add(tecla1)
-tecla2 = Tecla2()
-all_sprites.add(tecla2)
+
 
 # loop principal
 game=True
