@@ -4,6 +4,7 @@ import random
 import time
  
 pygame.init()
+pygame.mixer.init()
 
 #cria tela inicial
 largura= 700
@@ -25,11 +26,19 @@ assets['azul'] = pygame.transform.scale(assets['azul'], (850,600))
 assets['verde'] = pygame.image.load('assets/imagens/teclaverdeligada.png').convert_alpha()
 assets['verde'] = pygame.transform.scale(assets['verde'], (850,600))
 
+#carrega os sons do jogo
+pygame.mixer.music.load('assets/som/notadateclavermelha.mp3')
+pygame.mixer.music.set_volume(0.4)
+assets['som da tecla vermelha'] = pygame.mixer.Sound('assets/som/notadateclavermelha.mp3')
+assets['som da tecla amarela'] = pygame.mixer.Sound('assets/som/notadateclaamarela.mp3')
+assets['som da tecla azul'] = pygame.mixer.Sound('assets/som/notadateclaazul.mp3')
+
 DESLIGADO=0
 VERMELHO=1
 AMARELO=2
-VERDE = 4
 AZUL = 3
+VERDE = 4
+
 # define as classes do jogo (as quatro teclas)
 class Teclas(pygame.sprite.Sprite):
     def __init__(self):
@@ -54,7 +63,7 @@ def sorteiasequencia(x):
         tecla = random.randint(1,4)
         listatecla.append(tecla)
     return listatecla
-a = sorteiasequencia(1)
+
 #definindo a primeira tecla
 #recebe a lista tecla
 class Animacao (pygame.sprite.Sprite):
@@ -91,7 +100,6 @@ class Animacao (pygame.sprite.Sprite):
             if self.frame == len(self.explosion_anim):
                 self.kill()
             else:
-                center = self.rect.center
                 self.image = self.explosion_anim[self.frame]
                 self.rect = self.image.get_rect()
 
@@ -99,16 +107,49 @@ class Animacao (pygame.sprite.Sprite):
 tecla1 = Teclas()
 all_sprites = pygame.sprite.Group()
 all_sprites.add(tecla1)
-
+clock = pygame.time.Clock()
+FPS = 30
 
 # loop principal
 game=True
- 
+x = 1
 while game:
-    eventos  = pygame.event.get()
-    for evento in eventos:
-        if evento.type==pygame.QUIT:
+    clock.tick(FPS)
+    for event in pygame.event.get():
+        if event.type==pygame.QUIT:
             game=False
+        a = sorteiasequencia(x)
+        for i in a:
+            if a[i]==1:
+                animacao = Animacao(assets, sorteiasequencia)
+                
+                if event.type == pygame.KEYDOWN:
+                    if event.type == pygame.K_UP:
+                        x+=1
+                    else:
+                        break
+            if a[i]==2:
+                animacao = Animacao(assets, sorteiasequencia)
+                if event.type == pygame.KEYDOWN:
+                    if event.type == pygame.K_LEFT:
+                        x+=1
+                    else:
+                        break
+            if a[i]==3:
+                animacao = Animacao(assets, sorteiasequencia)
+                if event.type == pygame.KEYDOWN:
+                    if event.type == pygame.K_DOWN:
+                        x+=1
+                    else:
+                        break
+            if a[i]==4:
+                animacao = Animacao(assets, sorteiasequencia)
+                if event.type == pygame.KEYDOWN:
+                    if event.type == pygame.K_RIGHT:
+                        x+=1
+                    else:
+                        break
+
             pygame.quit()
             sys.exit()
 
@@ -124,5 +165,6 @@ while game:
      
 
 pygame.quit()
+
 
 
