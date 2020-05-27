@@ -27,12 +27,11 @@ assets['verde'] = pygame.image.load('assets/imagens/teclaverdeligada.png').conve
 assets['verde'] = pygame.transform.scale(assets['verde'], (1000,700))
 
 #carrega os sons do jogo
-#pygame.mixer.music.load('assets/som/notadateclavermelha.mp3')
-#pygame.mixer.music.set_volume(0.4)
-#assets['som da tecla vermelha'] = pygame.mixer.Sound('assets/som/notadateclavermelha.mp3')
-#assets['som da tecla amarela'] = pygame.mixer.Sound('assets/som/notadateclaamarela.mp3')
-#assets['som da tecla azul'] = pygame.mixer.Sound('assets/som/notadateclaazul.mp3')
-
+pygame.mixer.music.set_volume(0.4)
+assets['som da tecla vermelha'] = pygame.mixer.Sound('assets/som/notadateclavermelha.wav')
+assets['som da tecla amarela'] = pygame.mixer.Sound('assets/som/notadateclaamarela.wav')
+assets['som da tecla azul'] = pygame.mixer.Sound('assets/som/notadateclaazul.wav')
+assets['som da tecla verde'] = pygame.mixer.Sound('assets/som/notadateclaazul.wav')
   
 
 
@@ -52,17 +51,20 @@ class Animacao (pygame.sprite.Sprite):
     def __init__(self, assets, seq):
         pygame.sprite.Sprite.__init__(self)
         listaanimacao = []
-        if len(seq)==1:
-            listaanimacao.append(assets['desligado'])
+        listaanimacao.append(assets['desligado'])
         for i in seq:
             if i== 1:
                 listaanimacao.append(assets['vermelho'])
+                listaanimacao.append(assets['desligado'])
             elif i==2:
                 listaanimacao.append(assets['amarelo'])
+                listaanimacao.append(assets['desligado'])
             elif i==3:
                 listaanimacao.append(assets['azul'])
+                listaanimacao.append(assets['desligado'])
             else:
                 listaanimacao.append(assets['verde'])
+                listaanimacao.append(assets['desligado'])
 
         self.teclas_animacao = listaanimacao
         self.frame = 0
