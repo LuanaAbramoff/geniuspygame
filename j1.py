@@ -105,14 +105,14 @@ print(seq)
 botao_atual = 0
 animacao = Animacao(assets, seq)
 all_sprites.add(animacao)
-while game:
+while game and x<9:
     clock.tick(FPS)
     for event in pygame.event.get():
         if event.type==pygame.QUIT:
             game=False
         if event.type == pygame.KEYDOWN:
             if seq[botao_atual]==1 and event.key == pygame.K_UP:
-                botao_atual += 1
+                botao_atual += 1 
                 print('CIMA')
             elif seq[botao_atual]==2 and event.key == pygame.K_RIGHT:
                 botao_atual += 1
