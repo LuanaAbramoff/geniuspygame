@@ -7,7 +7,7 @@ pygame.init()
 pygame.mixer.init()
 
 #cria tela inicial
-largura= 700
+largura= 1000
 altura= 700
 surf = pygame.display.set_mode((largura, altura))
 surf.fill([255,255,255])
@@ -16,15 +16,15 @@ pygame.display.set_caption("Genius no escuro")
 #dicionário assets
 assets = {}
 assets['desligado'] = pygame.image.load('assets/imagens/geniusdesligado.png').convert_alpha()
-assets['desligado'] = pygame.transform.scale(assets['desligado'], (850,600))
+assets['desligado'] = pygame.transform.scale(assets['desligado'], (1000,700))
 assets['vermelho'] = pygame.image.load('assets/imagens/teclavermelhaligada.png').convert_alpha()
-assets['vermelho'] = pygame.transform.scale(assets['vermelho'], (850,600))
+assets['vermelho'] = pygame.transform.scale(assets['vermelho'], (1000,700))
 assets['amarelo'] = pygame.image.load('assets/imagens/teclaamarelaligada.png').convert_alpha()
-assets['amarelo'] = pygame.transform.scale(assets['amarelo'], (850,600))
+assets['amarelo'] = pygame.transform.scale(assets['amarelo'], (1000,700))
 assets['azul'] = pygame.image.load('assets/imagens/teclaazulligada.png').convert_alpha()
-assets['azul'] = pygame.transform.scale(assets['azul'], (850,600)) 
+assets['azul'] = pygame.transform.scale(assets['azul'], (1000,700)) 
 assets['verde'] = pygame.image.load('assets/imagens/teclaverdeligada.png').convert_alpha()
-assets['verde'] = pygame.transform.scale(assets['verde'], (850,600))
+assets['verde'] = pygame.transform.scale(assets['verde'], (1000,700))
 
 #carrega os sons do jogo
 #pygame.mixer.music.load('assets/som/notadateclavermelha.mp3')
@@ -43,6 +43,7 @@ def sorteiasequencia(x):
     while i<x:
         tecla = random.randint(1,4)
         listatecla.append(tecla)
+        i += 1
     return listatecla
 
 #definindo a primeira tecla
@@ -54,11 +55,11 @@ class Animacao (pygame.sprite.Sprite):
         if len(seq)==1:
             listaanimacao.append(assets['desligado'])
         for i in seq:
-            if seq[i]== 1:
+            if i== 1:
                 listaanimacao.append(assets['vermelho'])
-            elif seq[i]==2:
+            elif i==2:
                 listaanimacao.append(assets['amarelo'])
-            elif seq[i]==3:
+            elif i==3:
                 listaanimacao.append(assets['azul'])
             else:
                 listaanimacao.append(assets['verde'])
@@ -67,11 +68,13 @@ class Animacao (pygame.sprite.Sprite):
         self.frame = 0
         self.image = self.teclas_animacao[self.frame]
         self.rect = self.image.get_rect()
+        self.rect.x = 0
+        self.rect.y = 0
 
         self.last_update = pygame.time.get_ticks()
-        self.frame_ticks = 5000
+        self.frame_ticks = 500
 
-    def uptade(self):
+    def update(self):
         now = pygame.time.get_ticks()
         elapsed_ticks = now - self.last_update
 
@@ -80,10 +83,10 @@ class Animacao (pygame.sprite.Sprite):
 
             self.frame += 1
 
-            if self.frame == len(self.explosion_anim):
+            if self.frame == len(self.teclas_animacao):
                 self.kill()
             else:
-                self.image = self.explosion_anim[self.frame]
+                self.image = self.teclas_animacao[self.frame]
                 self.rect = self.image.get_rect()
 
 
@@ -95,48 +98,43 @@ FPS = 30
 # loop principal
 game=True
 x = 1
+seq = sorteiasequencia(x)
+print(seq)
+botao_atual = 0
+animacao = Animacao(assets, seq)
+all_sprites.add(animacao)
 while game:
     clock.tick(FPS)
     for event in pygame.event.get():
         if event.type==pygame.QUIT:
             game=False
-        seq = sorteiasequencia(x)
-        animacao = Animacao(assets, seq)
-        all_sprites.add(animacao)
-        all_sprites.update()
-        all_sprites.draw(surf)
-        pygame.display.update()
-        for i in seq:
-            if seq[i]==1:
-                if event.type == pygame.KEYDOWN:
-                    if event.type == pygame.K_UP:
-                        x+=1
-                    else:
-                        break
-            if seq[i]==2:
-                if event.type == pygame.KEYDOWN:
-                    if event.type == pygame.K_LEFT:
-                        x+=1
-                    else:
-                        break
-            if seq[i]==3:
-                animacao = Animacao(assets, sorteiasequencia)
-                if event.type == pygame.KEYDOWN:
-                    if event.type == pygame.K_DOWN:
-                        x+=1
-                    else:
-                        break
-            if seq[i]==4:
-                animacao = Animacao(assets, sorteiasequencia)
-                if event.type == pygame.KEYDOWN:
-                    if event.type == pygame.K_RIGHT:
-                        x+=1
-                    else:
-                        break
-        game=False
-     
+        if event.type == pygame.KEYDOWN:
+            if seq[botao_atual]==1 and event.key == pygame.K_UP:
+                botao_atual += 1
+                print('CIMA')
+            elif seq[botao_atual]==2 and event.key == pygame.K_RIGHT:
+                botao_atual += 1
+                print('DIREITA')
+            elif seq[botao_atual]==3 and event.key == pygame.K_DOWN:
+                botao_atual += 1
+                print('BAIXO')
+            elif seq[botao_atual]==4 and event.key == pygame.K_LEFT:
+                botao_atual += 1
+                print('ESQUERDA')
+            if botao_atual == len(seq):
+                x += 1
+                seq = sorteiasequencia(x)
+                animacao.kill()
+                animacao = Animacao(assets, seq)
+                all_sprites.add(animacao)
+                print("aqui")
+                botao_atual = 0
 
-pygame.QUIT()
-sys.exit()
+    all_sprites.update()
+    all_sprites.draw(surf)
+    pygame.display.update()
+   
+    
+pygame.quit()
 
 
