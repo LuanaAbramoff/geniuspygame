@@ -28,11 +28,11 @@ assets['verde'] = pygame.transform.scale(assets['verde'], (1000,700))
 
 #carrega os sons do jogo
 pygame.mixer.music.set_volume(0.4)
-assets['som da tecla vermelha'] = pygame.mixer.Sound('assets/som/notadateclavermelha.wav')
-assets['som da tecla amarela'] = pygame.mixer.Sound('assets/som/notadateclaamarela.wav')
-assets['som da tecla azul'] = pygame.mixer.Sound('assets/som/notadateclaazul.wav')
-assets['som da tecla verde'] = pygame.mixer.Sound('assets/som/notadateclaazul.wav')
-  
+assets['som da tecla vermelha'] = pygame.mixer.Sound('assets/som/vermelho.wav')
+assets['som da tecla amarela'] = pygame.mixer.Sound('assets/som/amarelo.wav')
+assets['som da tecla azul'] = pygame.mixer.Sound('assets/som/azul.wav')
+assets['som da tecla verde'] = pygame.mixer.Sound('assets/som/verde.wav')
+assets['som de perdeu'] = pygame.mixer.Sound('assets/som/perdeu.wav')
 
 
 #funcao que sorteia a seguencia das teclas
