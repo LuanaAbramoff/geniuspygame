@@ -114,7 +114,8 @@ FPS=30
 
 game=True
 x = 1 # x indica o nível
-seq = sorteiasequencia(x)
+vidas=3
+seq = sorteiasequencia(x) #cria primeira sequencia
 
 botao_atual = 0 #caminhando dentro da sequencia criada
 animacao = Animacao(assets, seq) #cria uma animacao
@@ -139,6 +140,21 @@ while game and x<9:
             elif seq[botao_atual]==4 and event.key == pygame.K_LEFT:
                 botao_atual += 1
                 print('ESQUERDA')
+            else: # se a pessoa erra alguma tecla
+                vidas-=1
+                if vidas==0:
+                    game=False
+                    #fazer animacao para comecar tudo de novo
+                assets['som de perdeu'].play()
+                botao_atual=0
+                animacao.kill()
+                x=1 #volta para o início 
+                seq = sorteiasequencia(x)
+                animacao=Animacao(assets,seq)
+                all_sprites.add(animacao)
+                
+                break
+           
             if botao_atual == len(seq):
                 x += 1 # passa para o proximo nivel
                 seq = sorteiasequencia(x) #nova sequencia
@@ -146,6 +162,8 @@ while game and x<9:
                 animacao = Animacao(assets, seq)#nova animacao
                 all_sprites.add(animacao)
                 botao_atual = 0
+            
+            
 
     all_sprites.update()
     all_sprites.draw(surf)
@@ -153,6 +171,10 @@ while game and x<9:
     text_rect = text_surface.get_rect()
     text_rect.midtop = (largura / 2,  10)
     surf.blit(text_surface, text_rect)
+    text_surface2 = assets['nivel_fonte'].render('Vidas: {0}'.format(vidas), True, (0, 0, 0))#mostra as vidas na tela
+    text_rect = text_surface.get_rect()
+    text_rect.midtop = (140,  altura-50)
+    surf.blit(text_surface2, text_rect)
     pygame.display.update()
    
     
