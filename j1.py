@@ -1,8 +1,10 @@
+#importa bibliotecas
 import sys
 import pygame 
 import random
 import time
- 
+
+#inicia pygame
 pygame.init()
 pygame.mixer.init()
 
@@ -25,6 +27,7 @@ assets['azul'] = pygame.image.load('assets/imagens/teclaazulligada.png').convert
 assets['azul'] = pygame.transform.scale(assets['azul'], (1000,700)) 
 assets['verde'] = pygame.image.load('assets/imagens/teclaverdeligada.png').convert_alpha()
 assets['verde'] = pygame.transform.scale(assets['verde'], (1000,700))
+assets["nivel_fonte"] = pygame.font.Font('assets/font/PressStart2P.ttf', 28)
 
 #carrega os sons do jogo
 pygame.mixer.music.set_volume(0.4)
@@ -45,8 +48,8 @@ def sorteiasequencia(x):
         i += 1
     return listatecla
 
-#definindo a primeira tecla
-#recebe a lista tecla
+
+#Classe Animacao
 class Animacao (pygame.sprite.Sprite):
     def __init__(self, assets, seq):
         pygame.sprite.Sprite.__init__(self)
@@ -91,20 +94,33 @@ class Animacao (pygame.sprite.Sprite):
                 self.image = self.teclas_animacao[self.frame]
                 self.rect = self.image.get_rect()
 
+            #seleciona o som de acordo com a tecla
+            if self.image == assets['vermelho']:
+                assets['som da tecla vermelha'].play()
+            elif self.image == assets['amarelo']:
+                assets['som da tecla amarela'].play()
+            elif self.image == assets['verde']:
+                assets['som da tecla verde'].play()
+            elif self.image == assets['azul']:
+                assets['som da tecla azul'].play()
 
 
+#cria o grupo dos objetos 
 all_sprites = pygame.sprite.Group()
+
+#tick da animacao
 clock = pygame.time.Clock()
-FPS = 30
+FPS=30
+
+game=True
+x = 1 # x indica o nível
+seq = sorteiasequencia(x)
+
+botao_atual = 0 #caminhando dentro da sequencia criada
+animacao = Animacao(assets, seq) #cria uma animacao
+all_sprites.add(animacao) #adiciona animacao
 
 # loop principal
-game=True
-x = 1
-seq = sorteiasequencia(x)
-print(seq)
-botao_atual = 0
-animacao = Animacao(assets, seq)
-all_sprites.add(animacao)
 while game and x<9:
     clock.tick(FPS)
     for event in pygame.event.get():
@@ -124,16 +140,19 @@ while game and x<9:
                 botao_atual += 1
                 print('ESQUERDA')
             if botao_atual == len(seq):
-                x += 1
-                seq = sorteiasequencia(x)
+                x += 1 # passa para o proximo nivel
+                seq = sorteiasequencia(x) #nova sequencia
                 animacao.kill()
-                animacao = Animacao(assets, seq)
+                animacao = Animacao(assets, seq)#nova animacao
                 all_sprites.add(animacao)
-                print("aqui")
                 botao_atual = 0
 
     all_sprites.update()
     all_sprites.draw(surf)
+    text_surface = assets['nivel_fonte'].render('Nível: {0}'.format(x), True, (0, 0, 255))#mostra o nível na tela
+    text_rect = text_surface.get_rect()
+    text_rect.midtop = (largura / 2,  10)
+    surf.blit(text_surface, text_rect)
     pygame.display.update()
    
     
