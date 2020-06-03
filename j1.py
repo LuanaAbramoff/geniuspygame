@@ -6,7 +6,9 @@
 # com oito teclas). Passando pelo nível 8, o jogador, que estava na Fase 1, passa para a próxima fase. Na fase 2, 
 # a tecla vermelha não acende mais, só seu som é tocado. Nessa etapa, ainda é relativamente simples, pois se um som
 # foi tocado mas nenhuma tecla acesa, certamente é a vermelha. Contudo, nas fases 3, 4, 5, gradualmente, as outras
-# teclas também deixam de acender, e o jogador passa a utilizar somente o sons para diferenciar as teclas. Bom jogo!
+# teclas também deixam de acender, e o jogador passa a utilizar somente o sons para diferenciar as teclas. 
+# Cada vez que o jogador errar ele perde uma vida e recomeca o primeiro nível da fase em que está. Cada fase possui 3 vidas. 
+# Quando perde as tres vidas em uma fase, o jogador perde e deve recomecar desde o inicio (fase 1 e nivel 1).Bom jogo!
 
 
 #importa bibliotecas
