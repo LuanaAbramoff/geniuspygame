@@ -45,16 +45,16 @@ assets['desligado azul'] = pygame.transform.scale(assets['desligado azul'], (100
 assets['desligado verde'] = pygame.image.load('assets/imagens/geniusdesligadoverde.PNG').convert_alpha()
 assets['desligado verde'] = pygame.transform.scale(assets['desligado verde'], (1000,700))
 
-assets['vermelho'] = pygame.image.load('assets/imagens/teclavermelhaligada.png').convert_alpha()
+assets['vermelho'] = pygame.image.load('assets/imagens/teclavermelhaligada.PNG').convert_alpha()
 assets['vermelho'] = pygame.transform.scale(assets['vermelho'], (1000,700))
 
-assets['amarelo'] = pygame.image.load('assets/imagens/teclaamarelaligadaa.PNG').convert_alpha()
+assets['amarelo'] = pygame.image.load('assets/imagens/teclaamarelaligada.PNG').convert_alpha()
 assets['amarelo'] = pygame.transform.scale(assets['amarelo'], (1000,700))
 
-assets['azul'] = pygame.image.load('assets/imagens/teclaazulligadaa.PNG').convert_alpha()
+assets['azul'] = pygame.image.load('assets/imagens/teclaazulligada.PNG').convert_alpha()
 assets['azul'] = pygame.transform.scale(assets['azul'], (1000,700)) 
 
-assets['verde'] = pygame.image.load('assets/imagens/teclaverdeligadaa.PNG').convert_alpha()
+assets['verde'] = pygame.image.load('assets/imagens/teclaverdeligada.PNG').convert_alpha()
 assets['verde'] = pygame.transform.scale(assets['verde'], (1000,700))
 
 assets["nivel_fonte"] = pygame.font.Font('assets/font/PressStart2P.ttf', 28)
@@ -194,7 +194,6 @@ class Animacao (pygame.sprite.Sprite):
                 assets['som da tecla verde'].play()
             elif self.image == assets['azul'] or self.image == assets['desligado verde']:
                 assets['som da tecla azul'].play()
-
 
 #cria o grupo dos objetos 
 all_sprites = pygame.sprite.Group()
