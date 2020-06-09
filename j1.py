@@ -23,7 +23,7 @@ pygame.mixer.init()
 
 #cria tela inicial
 largura= 1000
-altura= 700
+altura= 1600
 surf = pygame.display.set_mode((largura, altura))
 surf.fill([255,255,255])
 pygame.display.set_caption("Genius no escuro")
@@ -31,42 +31,50 @@ pygame.display.set_caption("Genius no escuro")
 #dicionário assets
 assets = {}
 assets['desligado'] = pygame.image.load('assets/imagens/geniusdesligado.PNG').convert_alpha()
-assets['desligado'] = pygame.transform.scale(assets['desligado'], (1000,700))
+assets['desligado'] = pygame.transform.scale(assets['desligado'], (603,601))
 
 assets['desligado vermelho'] = pygame.image.load('assets/imagens/geniusdesligadovermelho.PNG').convert_alpha()
-assets['desligado vermelho'] = pygame.transform.scale(assets['desligado vermelho'], (1000,700))
+assets['desligado vermelho'] = pygame.transform.scale(assets['desligado vermelho'], (603,601))
 
 assets['desligado amarelo'] = pygame.image.load('assets/imagens/geniusdesligadoamarelo.PNG').convert_alpha()
-assets['desligado amarelo'] = pygame.transform.scale(assets['desligado amarelo'], (1000,700))
+assets['desligado amarelo'] = pygame.transform.scale(assets['desligado amarelo'], (603,601))
 
 assets['desligado azul'] = pygame.image.load('assets/imagens/geniusdesligadoazul.PNG').convert_alpha()
-assets['desligado azul'] = pygame.transform.scale(assets['desligado azul'], (1000,700))
+assets['desligado azul'] = pygame.transform.scale(assets['desligado azul'], (603,601))
 
 assets['desligado verde'] = pygame.image.load('assets/imagens/geniusdesligadoverde.PNG').convert_alpha()
-assets['desligado verde'] = pygame.transform.scale(assets['desligado verde'], (1000,700))
+assets['desligado verde'] = pygame.transform.scale(assets['desligado verde'], (603,601))
 
 assets['vermelho'] = pygame.image.load('assets/imagens/teclavermelhaligada.PNG').convert_alpha()
-assets['vermelho'] = pygame.transform.scale(assets['vermelho'], (1000,700))
+assets['vermelho'] = pygame.transform.scale(assets['vermelho'], (603,601))
 
 assets['amarelo'] = pygame.image.load('assets/imagens/teclaamarelaligada.PNG').convert_alpha()
-assets['amarelo'] = pygame.transform.scale(assets['amarelo'], (1000,700))
+assets['amarelo'] = pygame.transform.scale(assets['amarelo'], (603,601))
 
 assets['azul'] = pygame.image.load('assets/imagens/teclaazulligada.PNG').convert_alpha()
-assets['azul'] = pygame.transform.scale(assets['azul'], (1000,700)) 
+assets['azul'] = pygame.transform.scale(assets['azul'], (603,601)) 
 
 assets['verde'] = pygame.image.load('assets/imagens/teclaverdeligada.PNG').convert_alpha()
-assets['verde'] = pygame.transform.scale(assets['verde'], (1000,700))
+assets['verde'] = pygame.transform.scale(assets['verde'], (603,601))
 
 assets["nivel_fonte"] = pygame.font.Font('assets/font/PressStart2P.ttf', 28)
 
 #carrega os sons do jogo
 pygame.mixer.music.set_volume(0.4)
-assets['som da tecla vermelha'] = pygame.mixer.Sound('assets/som/vermelho.wav')
-assets['som da tecla amarela'] = pygame.mixer.Sound('assets/som/amarelo.wav')
-assets['som da tecla azul'] = pygame.mixer.Sound('assets/som/azul.wav')
-assets['som da tecla verde'] = pygame.mixer.Sound('assets/som/verde.wav')
-assets['som de perdeu'] = pygame.mixer.Sound('assets/som/perdeu.wav')
+assets['som da tecla vermelha'] = pygame.mixer.Sound('assets/som/vermelho.ogg')
+assets['som da tecla amarela'] = pygame.mixer.Sound('assets/som/amarelo.ogg')
+assets['som da tecla azul'] = pygame.mixer.Sound('assets/som/azul.ogg')
+assets['som da tecla verde'] = pygame.mixer.Sound('assets/som/verde.ogg')
+assets['som de perdeu'] = pygame.mixer.Sound('assets/som/perdeu.ogg')
 
+#animacaopassardefase
+listaanimacao = []
+for i in range(36):
+    filename = 'assets/imagens/animacaopassadefase{}.png'.format(i)
+    img = pygame.image.load(filename).convert()
+    img = pygame.transform.scale(img,(603,601))
+    listaanimacao.append(img)
+assets['animacao para passar de fase']=listaanimacao
 
 #funcao que sorteia a seguencia das teclas
 def sorteiasequencia(x):
@@ -195,6 +203,49 @@ class Animacao (pygame.sprite.Sprite):
             elif self.image == assets['azul'] or self.image == assets['desligado verde']:
                 assets['som da tecla azul'].play()
 
+class Animacaopassadefase(pygame.sprite.Sprite):
+    def __init__(self, assets):
+        # Construtor da classe mãe (Sprite).
+        pygame.sprite.Sprite.__init__(self)
+
+        # Armazena a animação de explosão
+        self.animacaodefase = assets['animacao para passar de fase']
+
+        # Inicia o processo de animação colocando a primeira imagem na tela.
+        self.frame = 0  # Armazena o índice atual na animação
+        self.image = self.animacaodefase[self.frame]  # Pega a primeira imagem
+        self.rect = self.image.get_rect()
+
+        # Guarda o tick da primeira imagem, ou seja, o momento em que a imagem foi mostrada
+        self.last_update = pygame.time.get_ticks()
+
+        # Controle de ticks de animação: troca de imagem a cada self.frame_ticks milissegundos.
+        # Quando pygame.time.get_ticks() - self.last_update > self.frame_ticks a
+        # próxima imagem da animação será mostrada
+        self.frame_ticks = 50
+
+    def update(self):
+        # Verifica o tick atual.
+        now = pygame.time.get_ticks()
+        # Verifica quantos ticks se passaram desde a ultima mudança de frame.
+        elapsed_ticks = now - self.last_update
+
+        # Se já está na hora de mudar de imagem...
+        if elapsed_ticks > self.frame_ticks:
+            # Marca o tick da nova imagem.
+            self.last_update = now
+
+            # Avança um quadro.
+            self.frame += 1
+
+            # Verifica se já chegou no final da animação.
+            if self.frame == len(self.animacaodefase):
+                # Se sim, tchau explosão!
+                self.kill()
+            else:
+                # Se ainda não chegou ao fim da explosão, troca de imagem.
+                self.image = self.animacaodefase[self.frame]
+                self.rect = self.image.get_rect()
 #cria o grupo dos objetos 
 all_sprites = pygame.sprite.Group()
 
@@ -253,14 +304,17 @@ while game and nivel<9:
                     animacao = Animacao(assets, seq, fase)#nova animacao
                     all_sprites.add(animacao)
                 
-                if nivel==9:
+                if nivel==3:
                     fase+=1 # passa para a próxima fase
                     nivel=1
                     botao_atual=0
                     seq = sorteiasequencia(nivel)
-                    animacao.kill()
+                    animacaodeinicio = Animacaopassadefase(assets)
+                    all_sprites.add(animacaodeinicio)
+                    animacaodeinicio.kill()
                     animacao= Animacao(assets, seq, fase)
                     all_sprites.add(animacao)
+                    animacao.kill()
               
 
     all_sprites.update()
