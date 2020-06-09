@@ -22,8 +22,8 @@ pygame.init()
 pygame.mixer.init()
 
 #cria tela inicial
-largura= 1000
-altura= 1600
+largura= 603
+altura= 601
 surf = pygame.display.set_mode((largura, altura))
 surf.fill([255,255,255])
 pygame.display.set_caption("Genius no escuro")
@@ -262,9 +262,8 @@ seq = sorteiasequencia(nivel) #cria primeira sequencia
 botao_atual = 0 #caminha dentro da sequencia criada
 animacao = Animacao(assets, seq, fase) #cria uma animacao
 all_sprites.add(animacao) #adiciona animacao
-
 # loop principal
-while game and nivel<9:
+while game and nivel<4:
     clock.tick(FPS)
     for event in pygame.event.get():
         if event.type==pygame.QUIT:
@@ -304,14 +303,13 @@ while game and nivel<9:
                     animacao = Animacao(assets, seq, fase)#nova animacao
                     all_sprites.add(animacao)
                 
-                if nivel==3:
+                if nivel==4:
                     fase+=1 # passa para a próxima fase
                     nivel=1
                     botao_atual=0
                     seq = sorteiasequencia(nivel)
                     animacaodeinicio = Animacaopassadefase(assets)
                     all_sprites.add(animacaodeinicio)
-                    animacaodeinicio.kill()
                     animacao= Animacao(assets, seq, fase)
                     all_sprites.add(animacao)
                     animacao.kill()
