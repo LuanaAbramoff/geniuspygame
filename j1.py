@@ -22,40 +22,45 @@ pygame.init()
 pygame.mixer.init()
 
 #cria tela inicial
-largura= 603
+largura= 1000
 altura= 601
 surf = pygame.display.set_mode((largura, altura))
 surf.fill([255,255,255])
 pygame.display.set_caption("Genius no escuro")
 
+#define tamanho e posicao das imagens
+largura_imagem=603
+altura_imagem=601
+ximagem=180
+yimagem=0
 #dicionário assets
 assets = {}
 assets['desligado'] = pygame.image.load('assets/imagens/geniusdesligado.PNG').convert_alpha()
-assets['desligado'] = pygame.transform.scale(assets['desligado'], (603,601))
+assets['desligado'] = pygame.transform.scale(assets['desligado'], (largura_imagem,altura_imagem))
 
 assets['desligado vermelho'] = pygame.image.load('assets/imagens/geniusdesligadovermelho.PNG').convert_alpha()
-assets['desligado vermelho'] = pygame.transform.scale(assets['desligado vermelho'], (603,601))
+assets['desligado vermelho'] = pygame.transform.scale(assets['desligado vermelho'], (largura_imagem,altura_imagem))
 
 assets['desligado amarelo'] = pygame.image.load('assets/imagens/geniusdesligadoamarelo.PNG').convert_alpha()
-assets['desligado amarelo'] = pygame.transform.scale(assets['desligado amarelo'], (603,601))
+assets['desligado amarelo'] = pygame.transform.scale(assets['desligado amarelo'], (largura_imagem,altura_imagem))
 
 assets['desligado azul'] = pygame.image.load('assets/imagens/geniusdesligadoazul.PNG').convert_alpha()
-assets['desligado azul'] = pygame.transform.scale(assets['desligado azul'], (603,601))
+assets['desligado azul'] = pygame.transform.scale(assets['desligado azul'], (largura_imagem,altura_imagem))
 
 assets['desligado verde'] = pygame.image.load('assets/imagens/geniusdesligadoverde.PNG').convert_alpha()
-assets['desligado verde'] = pygame.transform.scale(assets['desligado verde'], (603,601))
+assets['desligado verde'] = pygame.transform.scale(assets['desligado verde'], (largura_imagem,altura_imagem))
 
 assets['vermelho'] = pygame.image.load('assets/imagens/teclavermelhaligada.PNG').convert_alpha()
-assets['vermelho'] = pygame.transform.scale(assets['vermelho'], (603,601))
+assets['vermelho'] = pygame.transform.scale(assets['vermelho'], (largura_imagem,altura_imagem))
 
 assets['amarelo'] = pygame.image.load('assets/imagens/teclaamarelaligada.PNG').convert_alpha()
-assets['amarelo'] = pygame.transform.scale(assets['amarelo'], (603,601))
+assets['amarelo'] = pygame.transform.scale(assets['amarelo'], (largura_imagem,altura_imagem))
 
 assets['azul'] = pygame.image.load('assets/imagens/teclaazulligada.PNG').convert_alpha()
-assets['azul'] = pygame.transform.scale(assets['azul'], (603,601)) 
+assets['azul'] = pygame.transform.scale(assets['azul'], (largura_imagem,altura_imagem)) 
 
 assets['verde'] = pygame.image.load('assets/imagens/teclaverdeligada.PNG').convert_alpha()
-assets['verde'] = pygame.transform.scale(assets['verde'], (603,601))
+assets['verde'] = pygame.transform.scale(assets['verde'], (largura_imagem,altura_imagem))
 
 assets["nivel_fonte"] = pygame.font.Font('assets/font/PressStart2P.ttf', 28)
 
@@ -86,6 +91,13 @@ def sorteiasequencia(x):
         i += 1
     return listatecla
 
+class AnimacaoTecla(pygame.sprite.Sprite):
+    def __init__(self, img):
+        pygame.sprite.Sprite.__init__(self)
+        self.image = img
+        self.rect = self.image.get_rect()
+        self.rect.x = ximagem
+        self.rect.y = yimagem
 
 #Classe Animacao
 class Animacao (pygame.sprite.Sprite):
@@ -172,8 +184,8 @@ class Animacao (pygame.sprite.Sprite):
         self.frame = 0
         self.image = self.teclas_animacao[self.frame]
         self.rect = self.image.get_rect()
-        self.rect.x = 0
-        self.rect.y = 0
+        self.rect.x = ximagem
+        self.rect.y = yimagem
 
         self.last_update = pygame.time.get_ticks()
         self.frame_ticks = 500
@@ -192,6 +204,8 @@ class Animacao (pygame.sprite.Sprite):
             else:
                 self.image = self.teclas_animacao[self.frame]
                 self.rect = self.image.get_rect()
+                self.rect.x = ximagem
+                self.rect.y = yimagem
 
             #seleciona o som de acordo com a tecla
             if self.image == assets['vermelho'] or self.image == assets['desligado vermelho']:
@@ -215,6 +229,8 @@ class Animacaopassadefase(pygame.sprite.Sprite):
         self.frame = 0  # Armazena o índice atual na animação
         self.image = self.animacaodefase[self.frame]  # Pega a primeira imagem
         self.rect = self.image.get_rect()
+        self.rect.x = ximagem
+        self.rect.y = yimagem
 
         # Guarda o tick da primeira imagem, ou seja, o momento em que a imagem foi mostrada
         self.last_update = pygame.time.get_ticks()
@@ -240,12 +256,15 @@ class Animacaopassadefase(pygame.sprite.Sprite):
 
             # Verifica se já chegou no final da animação.
             if self.frame == len(self.animacaodefase):
-                # Se sim, tchau explosão!
+                # Se sim, acaba com a animação
                 self.kill()
             else:
-                # Se ainda não chegou ao fim da explosão, troca de imagem.
+                # Se ainda não chegou ao fim da animacao, troca de imagem.
                 self.image = self.animacaodefase[self.frame]
                 self.rect = self.image.get_rect()
+                self.rect.x = ximagem
+                self.rect.y = yimagem
+
 #cria o grupo dos objetos 
 all_sprites = pygame.sprite.Group()
 
@@ -262,9 +281,17 @@ seq = sorteiasequencia(nivel) #cria primeira sequencia
 botao_atual = 0 #caminha dentro da sequencia criada
 animacao = Animacao(assets, seq, fase) #cria uma animacao
 all_sprites.add(animacao) #adiciona animacao
+mudando_fase = False
+botao_vermelho = AnimacaoTecla(assets['vermelho'])
+botao_amarelo = AnimacaoTecla(assets['amarelo'])
+botao_azul = AnimacaoTecla(assets['azul'])
+botao_verde = AnimacaoTecla(assets['verde'])
+
 # loop principal
 while game and nivel<4:
     clock.tick(FPS)
+    surf.fill([255,255,255])
+    
     for event in pygame.event.get():
         if event.type==pygame.QUIT:
             game=False
@@ -272,16 +299,21 @@ while game and nivel<4:
             if not animacao.alive():
                 if seq[botao_atual]==1 and event.key == pygame.K_UP:
                     botao_atual += 1 
+                    all_sprites.add(botao_vermelho)
                     print('CIMA')
                 elif seq[botao_atual]==2 and event.key == pygame.K_RIGHT:
                     botao_atual += 1
+                    all_sprites.add(botao_amarelo)
                     print('DIREITA')
                 elif seq[botao_atual]==3 and event.key == pygame.K_DOWN:
                     botao_atual += 1
+                    all_sprites.add(botao_azul)
                     print('BAIXO')
                 elif seq[botao_atual]==4 and event.key == pygame.K_LEFT:
                     botao_atual += 1
+                    all_sprites.add(botao_verde)
                     print('ESQUERDA')
+                    
                 else: # se a pessoa erra alguma tecla
                     vidas-=1
                     if vidas==0:
@@ -304,18 +336,33 @@ while game and nivel<4:
                     all_sprites.add(animacao)
                 
                 if nivel==4:
+                    botao_atual=0
                     fase+=1 # passa para a próxima fase
                     nivel=1
-                    botao_atual=0
-                    seq = sorteiasequencia(nivel)
-                    animacaodeinicio = Animacaopassadefase(assets)
-                    all_sprites.add(animacaodeinicio)
-                    animacao= Animacao(assets, seq, fase)
-                    all_sprites.add(animacao)
                     animacao.kill()
-              
+                    mudando_fase = True
+                    animacaodefase=Animacaopassadefase(assets)
+                    all_sprites.add(animacaodefase)
+
+        if event.type == pygame.KEYUP:
+            if event.key == pygame.K_UP:
+                botao_vermelho.kill()
+            if event.key == pygame.K_RIGHT:
+                botao_amarelo.kill()
+            if event.key == pygame.K_DOWN:
+                botao_azul.kill()
+            if event.key == pygame.K_LEFT:
+                botao_verde.kill()
+
+    if mudando_fase and not animacaodefase.alive():
+        seq = sorteiasequencia(nivel)
+        animacao= Animacao(assets, seq, fase)
+        all_sprites.add(animacao)
+        mudando_fase = False
+   
 
     all_sprites.update()
+    surf.blit(assets['desligado'], (ximagem, yimagem))
     all_sprites.draw(surf)
     text_surface = assets['nivel_fonte'].render('Nível: {0}'.format(nivel), True, (0, 0, 255))#mostra o nível na tela
     text_rect = text_surface.get_rect()
