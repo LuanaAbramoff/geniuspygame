@@ -1,14 +1,14 @@
 
 #Jogo Genius - Ana Barros e Luana Abramoff
 
-# O jogo consiste em tentar reproduzir a sequencia de teclas apresentadas ao jogador. No primeiro nível, 
-# a sequencia possui uma tecla apenas, no segundo, duas, e assim por diante, até chegar no nível oito (sequencia
-# com oito teclas). Passando pelo nível 8, o jogador, que estava na Fase 1, passa para a próxima fase. Na fase 2, 
-# a tecla vermelha não acende mais, só seu som é tocado. Nessa etapa, ainda é relativamente simples, pois se um som
-# foi tocado mas nenhuma tecla acesa, certamente é a vermelha. Contudo, nas fases 3, 4, 5, gradualmente, as outras
-# teclas também deixam de acender, e o jogador passa a utilizar somente o sons para diferenciar as teclas. 
-# Cada vez que o jogador errar ele perde uma vida e recomeca o primeiro nível da fase em que está. Cada fase possui 3 vidas. 
-# Quando perde as tres vidas em uma fase, o jogador perde e deve recomecar desde o inicio (fase 1 e nivel 1).Bom jogo!
+#O objetivo do jogo é tentar reproduzir a sequencia de teclas apresentadas. No primeiro nível,
+#a sequencia possui uma tecla apenas, no segundo, duas, e assim por diante, até chegar no nível cinco (sequencia
+#com cinco teclas). Passando pelo nível 5, o jogador, que estava na fase 1, passa para a próxima fase. Na fase 2,
+#a tecla vermelha não acende mais, só seu som é tocado. Nessa etapa, ainda é relativamente simples, pois se um som
+#foi tocado mas nenhuma tecla acesa, certamente é a vermelha. Contudo, nas fases 3, 4, 5, gradualmente, as outras
+#teclas também deixam de acender, e o jogador passa a utilizar somente o sons para diferenciar as teclas.
+#Cada vez que o jogador erra, ele perde uma vida e recomeca do primeiro nível da fase em que está. Cada fase possui 3 vidas.
+#Quando perde as tres vidas em uma mesma fase, o jogador perde de vez. Bom jogo!
 
 
 #importa bibliotecas
@@ -17,7 +17,7 @@ import pygame
 import random
 import time
 
-#inicia pygame
+#inicia pygame e pygame mixer
 pygame.init()
 pygame.mixer.init()
 
@@ -33,7 +33,8 @@ largura_imagem=603
 altura_imagem=601
 ximagem=180
 yimagem=0
-#dicionário assets
+
+#dicionário assets imagens
 assets = {}
 assets['desligado'] = pygame.image.load('assets/imagens/geniusdesligado.PNG').convert_alpha()
 assets['desligado'] = pygame.transform.scale(assets['desligado'], (largura_imagem,altura_imagem))
@@ -62,15 +63,20 @@ assets['azul'] = pygame.transform.scale(assets['azul'], (largura_imagem,altura_i
 assets['verde'] = pygame.image.load('assets/imagens/teclaverdeligada.PNG').convert_alpha()
 assets['verde'] = pygame.transform.scale(assets['verde'], (largura_imagem,altura_imagem))
 
-assets["nivel_fonte"] = pygame.font.Font('assets/font/PressStart2P.ttf', 28)
+assets['instru1'] = pygame.image.load('assets/imagens/instrucoes.png').convert_alpha()
+assets['instru1'] = pygame.transform.scale(assets['instru1'], (largura_imagem,altura_imagem))
 
-#carrega os sons do jogo
-pygame.mixer.music.set_volume(0.4)
-assets['som da tecla vermelha'] = pygame.mixer.Sound('assets/som/vermelho.ogg')
-assets['som da tecla amarela'] = pygame.mixer.Sound('assets/som/amarelo.ogg')
-assets['som da tecla azul'] = pygame.mixer.Sound('assets/som/azul.ogg')
-assets['som da tecla verde'] = pygame.mixer.Sound('assets/som/verde.ogg')
-assets['som de perdeu'] = pygame.mixer.Sound('assets/som/perdeu.ogg')
+assets['instru2'] = pygame.image.load('assets/imagens/instrucoes1.png').convert_alpha()
+assets['instru2'] = pygame.transform.scale(assets['instru2'], (largura_imagem,altura_imagem))
+
+assets['instru3'] = pygame.image.load('assets/imagens/instrucoes2.png').convert_alpha()
+assets['instru3'] = pygame.transform.scale(assets['instru3'], (largura_imagem,altura_imagem))
+
+assets['instru4'] = pygame.image.load('assets/imagens/instrucoes3.png').convert_alpha()
+assets['instru4'] = pygame.transform.scale(assets['instru4'], (largura_imagem,altura_imagem))
+
+assets['instru5'] = pygame.image.load('assets/imagens/instrucoes4.png').convert_alpha()
+assets['instru5'] = pygame.transform.scale(assets['instru5'], (largura_imagem,altura_imagem))
 
 #animacaopassardefase
 listaanimacao = []
@@ -107,16 +113,19 @@ for i in range(20):
     img = pygame.transform.scale(img,(603,601))
     listaperdeu.append(img)
 assets['animacao perdeu'] = listaperdeu
-#funcao que sorteia a seguencia das teclas
-def sorteiasequencia(x):
-    i=0
-    listatecla=[]
-    while i<x:
-        tecla = random.randint(1,4)
-        listatecla.append(tecla)
-        i += 1
-    return listatecla
 
+#dicionario assets som e fonte
+pygame.mixer.music.set_volume(0.4)
+assets['som da tecla vermelha'] = pygame.mixer.Sound('assets/som/vermelho.ogg')
+assets['som da tecla amarela'] = pygame.mixer.Sound('assets/som/amarelo.ogg')
+assets['som da tecla azul'] = pygame.mixer.Sound('assets/som/azul.ogg')
+assets['som da tecla verde'] = pygame.mixer.Sound('assets/som/verde.ogg')
+assets['som de perdeu'] = pygame.mixer.Sound('assets/som/perdeu.ogg')
+assets['som passa de fase'] = pygame.mixer.Sound('assets/som/passadefase.ogg')
+
+assets["nivel_fonte"] = pygame.font.Font('assets/font/PressStart2P.ttf', 28)
+
+#animacao que acende as teclas enquanto joga
 class AnimacaoTecla(pygame.sprite.Sprite):
     def __init__(self, img):
         pygame.sprite.Sprite.__init__(self)
@@ -125,7 +134,32 @@ class AnimacaoTecla(pygame.sprite.Sprite):
         self.rect.x = ximagem
         self.rect.y = yimagem
 
-#Classe Animacao
+#animacao das instrucoes antes das fases
+class AnimacaoInstrucao(pygame.sprite.Sprite):
+    def __init__(self, img):
+        pygame.sprite.Sprite.__init__(self)
+        self.image = img
+        self.rect = self.image.get_rect()
+        self.rect.x = ximagem
+        self.rect.y = yimagem
+        self.last_update = pygame.time.get_ticks()
+        self.frame_ticks = 5000
+    
+    def restart(self):
+        self.last_update = pygame.time.get_ticks()
+
+    def update(self):
+        # Verifica o tick atual.
+        now = pygame.time.get_ticks()
+        # Verifica quantos ticks se passaram desde a ultima mudança de frame.
+        elapsed_ticks = now - self.last_update
+
+        # Se já está na hora de mudar de imagem...
+        if elapsed_ticks > self.frame_ticks:
+            self.kill()
+
+              
+#animacao das teclas do jogo
 class Animacao (pygame.sprite.Sprite):
     def __init__(self, assets, seq, fase):
         pygame.sprite.Sprite.__init__(self)
@@ -243,13 +277,14 @@ class Animacao (pygame.sprite.Sprite):
             elif self.image == assets['azul'] or self.image == assets['desligado verde']:
                 assets['som da tecla azul'].play()
 
+#animacao inicial
 class AnimacaoInicio(pygame.sprite.Sprite):
     def __init__(self, assets):
         # Construtor da classe mãe (Sprite).
         pygame.sprite.Sprite.__init__(self)
         self.Terminou = False
 
-        # Armazena a animação de explosão
+        # Armazena a animação 
         self.animacaodeinicio = assets['animacao de inicio']
 
         # Inicia o processo de animação colocando a primeira imagem na tela.
@@ -292,13 +327,15 @@ class AnimacaoInicio(pygame.sprite.Sprite):
                 self.rect.x = ximagem
                 self.rect.y = yimagem
 
+#animacao entre fases
 class Animacaopassadefase(pygame.sprite.Sprite):
     def __init__(self, assets):
         # Construtor da classe mãe (Sprite).
         pygame.sprite.Sprite.__init__(self)
 
-        # Armazena a animação de explosão
+        # Armazena a animação 
         self.animacaodefase = assets['animacao para passar de fase']
+
 
         # Inicia o processo de animação colocando a primeira imagem na tela.
         self.frame = 0  # Armazena o índice atual na animação
@@ -316,11 +353,13 @@ class Animacaopassadefase(pygame.sprite.Sprite):
         self.frame_ticks = 50
 
     def update(self):
+       
         # Verifica o tick atual.
         now = pygame.time.get_ticks()
         # Verifica quantos ticks se passaram desde a ultima mudança de frame.
         elapsed_ticks = now - self.last_update
 
+        
         # Se já está na hora de mudar de imagem...
         if elapsed_ticks > self.frame_ticks:
             # Marca o tick da nova imagem.
@@ -339,13 +378,15 @@ class Animacaopassadefase(pygame.sprite.Sprite):
                 self.rect = self.image.get_rect()
                 self.rect.x = ximagem
                 self.rect.y = yimagem
+           
 
+#animacao para apertar espaco antes de jogar
 class AnimacaoEspaco(pygame.sprite.Sprite):
     def __init__(self, assets):
         # Construtor da classe mãe (Sprite).
         pygame.sprite.Sprite.__init__(self)
 
-        # Armazena a animação de explosão
+        # Armazena a animação
         self.animacaoespaco = assets['animacao espaco']
 
         # Inicia o processo de animação colocando a primeira imagem na tela.
@@ -388,13 +429,15 @@ class AnimacaoEspaco(pygame.sprite.Sprite):
                 self.rect.x = ximagem
                 self.rect.y = yimagem
 
+#animacao quando perde
 class AnimacaoPerdeu(pygame.sprite.Sprite):
     def __init__(self, assets):
         # Construtor da classe mãe (Sprite).
         pygame.sprite.Sprite.__init__(self)
 
-        # Armazena a animação de explosão
+        # Armazena a animação
         self.animacaoperdeu = assets['animacao perdeu']
+        self.Terminouu = False
 
         # Inicia o processo de animação colocando a primeira imagem na tela.
         self.frame = 0  # Armazena o índice atual na animação
@@ -409,7 +452,7 @@ class AnimacaoPerdeu(pygame.sprite.Sprite):
         # Controle de ticks de animação: troca de imagem a cada self.frame_ticks milissegundos.
         # Quando pygame.time.get_ticks() - self.last_update > self.frame_ticks a
         # próxima imagem da animação será mostrada
-        self.frame_ticks = 50
+        self.frame_ticks = 200
 
     def update(self):
         # Verifica o tick atual.
@@ -428,14 +471,23 @@ class AnimacaoPerdeu(pygame.sprite.Sprite):
             # Verifica se já chegou no final da animação.
             if self.frame == len(self.animacaoperdeu):
                 # Se sim, acaba com a animação
-                self.kill()
-            else:
+                self.Terminouu = True
+            elif self.frame < len(self.animacaoperdeu):
                 # Se ainda não chegou ao fim da animacao, troca de imagem.
                 self.image = self.animacaoperdeu[self.frame]
                 self.rect = self.image.get_rect()
                 self.rect.x = ximagem
                 self.rect.y = yimagem
 
+#funcao que sorteia a seguencia das teclas
+def sorteiasequencia(x):
+    i=0
+    listatecla=[]
+    while i<x:
+        tecla = random.randint(1,4)
+        listatecla.append(tecla)
+        i += 1
+    return listatecla
 
 #cria o grupo dos objetos 
 all_sprites = pygame.sprite.Group()
@@ -444,34 +496,20 @@ all_sprites = pygame.sprite.Group()
 clock = pygame.time.Clock()
 FPS=30
 
+#condicoes iniciais
 game=True
 inicial = True
-nivel = 1 # indica o nível
+nivel = 1 
 fase = 1
 vidas=3
 seq = sorteiasequencia(nivel) #cria primeira sequencia
-
 botao_atual = 0 #caminha dentro da sequencia criada
-
-'''while inicial:
-    if animacaodeinicio.Terminou:
-        animaespaco = AnimacaoEspaco(assets)
-        all_sprites.add(animaespaco)
-        for event in pygame.event.get():
-            if event.type == pygame.KEYDOWN:
-                while event.key != pygame.K_SPACE:
-                    animaespaco = AnimacaoEspaco(assets)
-                    all_sprites.add(animaespaco)
-                    game = False
-                if event.key == pygame.K_SPACE:
-                    animaespaco.kill()
-                    game = True'''
-                    
-
 tela_inicial = True
 criaanimacaodeespaco = False
 animacaodeinicio = AnimacaoInicio(assets)
 all_sprites.add(animacaodeinicio)
+
+
 # ===== Loop principal =====
 while tela_inicial:
     # ----- Trata eventos
@@ -495,20 +533,33 @@ while tela_inicial:
     all_sprites.draw(surf)
     # ----- Atualiza estado do jogo
     pygame.display.update()  # Mostra o novo frame para o jogador 
-                      
-animacao = Animacao(assets, seq, fase) #cria uma animacao
-all_sprites.add(animacao) #adiciona animacao
+
+
+instru1=AnimacaoInstrucao(assets["instru1"])
+instru2=AnimacaoInstrucao(assets["instru2"])
+instru3=AnimacaoInstrucao(assets["instru3"])
+instru4=AnimacaoInstrucao(assets["instru4"])
+instru5=AnimacaoInstrucao(assets["instru5"])
+instru_i = 0
+instrucoes = [instru1, instru2, instru3, instru4, instru5]
+
+all_sprites.add(instru1)
+instrucao = instru1
+
 mudando_fase = False
+mostrando_instrucao = True
+
 botao_vermelho = AnimacaoTecla(assets['vermelho'])
 botao_amarelo = AnimacaoTecla(assets['amarelo'])
 botao_azul = AnimacaoTecla(assets['azul'])
 botao_verde = AnimacaoTecla(assets['verde'])
 
+animaperdeu = None
+
 # loop principal
-while game and nivel<4:
+while game and nivel<6:
     clock.tick(FPS)
     surf.fill([255,255,255])
-    
     for event in pygame.event.get():
         if event.type==pygame.QUIT:
             game=False
@@ -528,44 +579,46 @@ while game and nivel<4:
                     print('ESQUERDA')
 
         if event.type == pygame.KEYUP:
+
             if event.key == pygame.K_UP:
                 botao_vermelho.kill()
                 if seq[botao_atual]==1:
                     botao_atual += 1 
-                    # Toca a música
                 else:
                     vidas-=1
+                    
                     if vidas==0:
                         animaperdeu = AnimacaoPerdeu(assets)
                         all_sprites.add(animaperdeu)
-                        game=False
-                        #fazer animacao para comecar tudo de novo
+                    else:
+                        botao_atual=0
+                        animacao.kill()
+                        nivel=1 #volta para o início 
+                        seq = sorteiasequencia(nivel)
+                        animacao=Animacao(assets,seq, fase)
+                        all_sprites.add(animacao)
+
                     assets['som de perdeu'].play()
-                    botao_atual=0
-                    animacao.kill()
-                    nivel=1 #volta para o início 
-                    seq = sorteiasequencia(nivel)
-                    animacao=Animacao(assets,seq, fase)
-                    all_sprites.add(animacao)
+
             elif event.key == pygame.K_RIGHT:
                 botao_amarelo.kill()
                 if seq[botao_atual]==2:
                     botao_atual += 1
-                    # Toca a música
                 else:
                     vidas-=1
                     if vidas==0:
                         animaperdeu = AnimacaoPerdeu(assets)
                         all_sprites.add(animaperdeu)
-                        game=False
-                        #fazer animacao para comecar tudo de novo
+                    else:
+                        botao_atual=0
+                        animacao.kill()
+                        nivel=1 #volta para o início 
+                        seq = sorteiasequencia(nivel)
+                        animacao=Animacao(assets,seq, fase)
+                        all_sprites.add(animacao)
+
                     assets['som de perdeu'].play()
-                    botao_atual=0
-                    animacao.kill()
-                    nivel=1 #volta para o início 
-                    seq = sorteiasequencia(nivel)
-                    animacao=Animacao(assets,seq, fase)
-                    all_sprites.add(animacao)
+                
             elif event.key == pygame.K_DOWN:
                 botao_azul.kill()
                 if seq[botao_atual]==3:
@@ -575,15 +628,16 @@ while game and nivel<4:
                     if vidas==0:
                         animaperdeu = AnimacaoPerdeu(assets)
                         all_sprites.add(animaperdeu)
-                        game=False
-                        #fazer animacao para comecar tudo de novo
+                    else:
+                        botao_atual=0
+                        animacao.kill()
+                        nivel=1 #volta para o início 
+                        seq = sorteiasequencia(nivel)
+                        animacao=Animacao(assets,seq, fase)
+                        all_sprites.add(animacao)
+
                     assets['som de perdeu'].play()
-                    botao_atual=0
-                    animacao.kill()
-                    nivel=1 #volta para o início 
-                    seq = sorteiasequencia(nivel)
-                    animacao=Animacao(assets,seq, fase)
-                    all_sprites.add(animacao)
+
             elif event.key == pygame.K_LEFT:
                 botao_verde.kill()
                 if seq[botao_atual]==4:
@@ -593,16 +647,16 @@ while game and nivel<4:
                     if vidas==0:
                         animaperdeu = AnimacaoPerdeu(assets)
                         all_sprites.add(animaperdeu)
-                        game=False
-                        #fazer animacao para comecar tudo de novo
+                        
+                    else:
+                        botao_atual=0
+                        animacao.kill()
+                        nivel=1 #volta para o início 
+                        seq = sorteiasequencia(nivel)
+                        animacao=Animacao(assets,seq, fase)
+                        all_sprites.add(animacao)
+
                     assets['som de perdeu'].play()
-                    botao_atual=0
-                    animacao.kill()
-                    nivel=1 #volta para o início 
-                    seq = sorteiasequencia(nivel)
-                    animacao=Animacao(assets,seq, fase)
-                    all_sprites.add(animacao)
-        
             if botao_atual == len(seq):
                 nivel += 1 # passa para o proximo nivel
                 botao_atual = 0
@@ -611,21 +665,34 @@ while game and nivel<4:
                 animacao = Animacao(assets, seq, fase)#nova animacao
                 all_sprites.add(animacao)
             
-            if nivel==4:
+            if nivel==6:
+                assets['som passa de fase'].play()
                 botao_atual=0
                 fase+=1 # passa para a próxima fase
                 nivel=1
                 animacao.kill()
                 mudando_fase = True
-                animacaodefase=Animacaopassadefase(assets)
+                animacaodefase = Animacaopassadefase(assets)
                 all_sprites.add(animacaodefase)
 
     if mudando_fase and not animacaodefase.alive():
+        instru_i += 1
+        if instru_i < len(instrucoes):
+            instrucao = instrucoes[instru_i]
+            instrucao.restart()
+            all_sprites.add(instrucao)
+        mostrando_instrucao = True
+        mudando_fase = False
+   
+    if mostrando_instrucao and not instrucao.alive():
         seq = sorteiasequencia(nivel)
         animacao= Animacao(assets, seq, fase)
         all_sprites.add(animacao)
-        mudando_fase = False
-   
+        mostrando_instrucao = False
+
+    if animaperdeu is not None and animaperdeu.Terminouu:
+        animaperdeu.kill()
+        game=False
 
     all_sprites.update()
     surf.blit(assets['desligado'], (ximagem, yimagem))
@@ -646,8 +713,6 @@ while game and nivel<4:
     surf.blit(text_surface2, text_rect)
     pygame.display.update()
    
-   
-    
 pygame.quit()
 
 
