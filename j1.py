@@ -99,6 +99,14 @@ for i in range(8):
     listaespaco.append(img)
 assets['animacao espaco']=listaespaco
 
+#animacaoperdeu
+listaperdeu = []
+for i in range(20):
+    filename = 'assets/imagens/perdeu ({}).png'.format(i)
+    img = pygame.image.load(filename).convert()
+    img = pygame.transform.scale(img,(603,601))
+    listaperdeu.append(img)
+assets['animacao perdeu'] = listaperdeu
 #funcao que sorteia a seguencia das teclas
 def sorteiasequencia(x):
     i=0
@@ -239,6 +247,7 @@ class AnimacaoInicio(pygame.sprite.Sprite):
     def __init__(self, assets):
         # Construtor da classe mãe (Sprite).
         pygame.sprite.Sprite.__init__(self)
+        self.Terminou = False
 
         # Armazena a animação de explosão
         self.animacaodeinicio = assets['animacao de inicio']
@@ -275,13 +284,14 @@ class AnimacaoInicio(pygame.sprite.Sprite):
             # Verifica se já chegou no final da animação.
             if self.frame == len(self.animacaodeinicio):
                 # Se sim, acaba com a animação
-                self.kill()
-            else:
+                self.Terminou = True
+            elif self.frame < len(self.animacaodeinicio):
                 # Se ainda não chegou ao fim da animacao, troca de imagem.
                 self.image = self.animacaodeinicio[self.frame]
                 self.rect = self.image.get_rect()
                 self.rect.x = ximagem
                 self.rect.y = yimagem
+
 class Animacaopassadefase(pygame.sprite.Sprite):
     def __init__(self, assets):
         # Construtor da classe mãe (Sprite).
@@ -370,13 +380,63 @@ class AnimacaoEspaco(pygame.sprite.Sprite):
             # Verifica se já chegou no final da animação.
             if self.frame == len(self.animacaoespaco):
                 # Se sim, acaba com a animação
-                self.kill()
+                self.frame = 0
             else:
                 # Se ainda não chegou ao fim da animacao, troca de imagem.
                 self.image = self.animacaoespaco[self.frame]
                 self.rect = self.image.get_rect()
                 self.rect.x = ximagem
                 self.rect.y = yimagem
+
+class AnimacaoPerdeu(pygame.sprite.Sprite):
+    def __init__(self, assets):
+        # Construtor da classe mãe (Sprite).
+        pygame.sprite.Sprite.__init__(self)
+
+        # Armazena a animação de explosão
+        self.animacaoperdeu = assets['animacao perdeu']
+
+        # Inicia o processo de animação colocando a primeira imagem na tela.
+        self.frame = 0  # Armazena o índice atual na animação
+        self.image = self.animacaoperdeu[self.frame]  # Pega a primeira imagem
+        self.rect = self.image.get_rect()
+        self.rect.x = ximagem
+        self.rect.y = yimagem
+
+        # Guarda o tick da primeira imagem, ou seja, o momento em que a imagem foi mostrada
+        self.last_update = pygame.time.get_ticks()
+
+        # Controle de ticks de animação: troca de imagem a cada self.frame_ticks milissegundos.
+        # Quando pygame.time.get_ticks() - self.last_update > self.frame_ticks a
+        # próxima imagem da animação será mostrada
+        self.frame_ticks = 50
+
+    def update(self):
+        # Verifica o tick atual.
+        now = pygame.time.get_ticks()
+        # Verifica quantos ticks se passaram desde a ultima mudança de frame.
+        elapsed_ticks = now - self.last_update
+
+        # Se já está na hora de mudar de imagem...
+        if elapsed_ticks > self.frame_ticks:
+            # Marca o tick da nova imagem.
+            self.last_update = now
+
+            # Avança um quadro.
+            self.frame += 1
+
+            # Verifica se já chegou no final da animação.
+            if self.frame == len(self.animacaoperdeu):
+                # Se sim, acaba com a animação
+                self.kill()
+            else:
+                # Se ainda não chegou ao fim da animacao, troca de imagem.
+                self.image = self.animacaoperdeu[self.frame]
+                self.rect = self.image.get_rect()
+                self.rect.x = ximagem
+                self.rect.y = yimagem
+
+
 #cria o grupo dos objetos 
 all_sprites = pygame.sprite.Group()
 
@@ -385,26 +445,57 @@ clock = pygame.time.Clock()
 FPS=30
 
 game=True
+inicial = True
 nivel = 1 # indica o nível
 fase = 1
 vidas=3
 seq = sorteiasequencia(nivel) #cria primeira sequencia
 
 botao_atual = 0 #caminha dentro da sequencia criada
-#animacaodeinicio = AnimacaoInicio(assets)
-#all_sprites.add(animacaodeinicio)
-#animacaodeinicio.kill()
-animaespaco = AnimacaoEspaco(assets)
-all_sprites.add(animaespaco)
-for event in pygame.event.get():
-    if event.type == pygame.KEYDOWN:
-        while event.key != pygame.K_SPACE:
-            animaespaco = AnimacaoEspaco(assets)
-            all_sprites.add(animaespaco)
-            game = False
-        if event.key == pygame.K_SPACE:
-            animaespaco.kill()
-            game = True
+
+'''while inicial:
+    if animacaodeinicio.Terminou:
+        animaespaco = AnimacaoEspaco(assets)
+        all_sprites.add(animaespaco)
+        for event in pygame.event.get():
+            if event.type == pygame.KEYDOWN:
+                while event.key != pygame.K_SPACE:
+                    animaespaco = AnimacaoEspaco(assets)
+                    all_sprites.add(animaespaco)
+                    game = False
+                if event.key == pygame.K_SPACE:
+                    animaespaco.kill()
+                    game = True'''
+                    
+
+tela_inicial = True
+criaanimacaodeespaco = False
+animacaodeinicio = AnimacaoInicio(assets)
+all_sprites.add(animacaodeinicio)
+# ===== Loop principal =====
+while tela_inicial:
+    # ----- Trata eventos
+    for event in pygame.event.get():
+        # ----- Verifica consequências
+        if event.type == pygame.QUIT:
+            tela_inicial = False
+        if event.type == pygame.KEYDOWN:
+            if event.key == pygame.K_SPACE and animacaodeinicio.Terminou:
+                animaespaco.kill()
+                tela_inicial = False
+ 
+    # ----- Gera saídas
+    if animacaodeinicio.Terminou and not criaanimacaodeespaco:
+        animacaodeinicio.kill()
+        criaanimacaodeespaco = True
+        animaespaco = AnimacaoEspaco(assets)
+        all_sprites.add(animaespaco)
+
+    all_sprites.update()
+    all_sprites.draw(surf)
+    # ----- Atualiza estado do jogo
+    pygame.display.update()  # Mostra o novo frame para o jogador 
+                      
 animacao = Animacao(assets, seq, fase) #cria uma animacao
 all_sprites.add(animacao) #adiciona animacao
 mudando_fase = False
@@ -423,26 +514,30 @@ while game and nivel<4:
             game=False
         if event.type == pygame.KEYDOWN:
             if not animacao.alive():
-                if seq[botao_atual]==1 and event.key == pygame.K_UP:
-                    botao_atual += 1 
+                if event.key == pygame.K_UP:
                     all_sprites.add(botao_vermelho)
                     print('CIMA')
-                elif seq[botao_atual]==2 and event.key == pygame.K_RIGHT:
-                    botao_atual += 1
+                elif event.key == pygame.K_RIGHT:
                     all_sprites.add(botao_amarelo)
                     print('DIREITA')
-                elif seq[botao_atual]==3 and event.key == pygame.K_DOWN:
-                    botao_atual += 1
+                elif event.key == pygame.K_DOWN:
                     all_sprites.add(botao_azul)
                     print('BAIXO')
-                elif seq[botao_atual]==4 and event.key == pygame.K_LEFT:
-                    botao_atual += 1
+                elif event.key == pygame.K_LEFT:
                     all_sprites.add(botao_verde)
                     print('ESQUERDA')
-                    
-                else: # se a pessoa erra alguma tecla
+
+        if event.type == pygame.KEYUP:
+            if event.key == pygame.K_UP:
+                botao_vermelho.kill()
+                if seq[botao_atual]==1:
+                    botao_atual += 1 
+                    # Toca a música
+                else:
                     vidas-=1
                     if vidas==0:
+                        animaperdeu = AnimacaoPerdeu(assets)
+                        all_sprites.add(animaperdeu)
                         game=False
                         #fazer animacao para comecar tudo de novo
                     assets['som de perdeu'].play()
@@ -452,33 +547,78 @@ while game and nivel<4:
                     seq = sorteiasequencia(nivel)
                     animacao=Animacao(assets,seq, fase)
                     all_sprites.add(animacao)
-            
-                if botao_atual == len(seq):
-                    nivel += 1 # passa para o proximo nivel
-                    botao_atual = 0
-                    seq = sorteiasequencia(nivel) #nova sequencia
-                    animacao.kill()
-                    animacao = Animacao(assets, seq, fase)#nova animacao
-                    all_sprites.add(animacao)
-                
-                if nivel==4:
-                    botao_atual=0
-                    fase+=1 # passa para a próxima fase
-                    nivel=1
-                    animacao.kill()
-                    mudando_fase = True
-                    animacaodefase=Animacaopassadefase(assets)
-                    all_sprites.add(animacaodefase)
-
-        if event.type == pygame.KEYUP:
-            if event.key == pygame.K_UP:
-                botao_vermelho.kill()
-            if event.key == pygame.K_RIGHT:
+            elif event.key == pygame.K_RIGHT:
                 botao_amarelo.kill()
-            if event.key == pygame.K_DOWN:
+                if seq[botao_atual]==2:
+                    botao_atual += 1
+                    # Toca a música
+                else:
+                    vidas-=1
+                    if vidas==0:
+                        animaperdeu = AnimacaoPerdeu(assets)
+                        all_sprites.add(animaperdeu)
+                        game=False
+                        #fazer animacao para comecar tudo de novo
+                    assets['som de perdeu'].play()
+                    botao_atual=0
+                    animacao.kill()
+                    nivel=1 #volta para o início 
+                    seq = sorteiasequencia(nivel)
+                    animacao=Animacao(assets,seq, fase)
+                    all_sprites.add(animacao)
+            elif event.key == pygame.K_DOWN:
                 botao_azul.kill()
-            if event.key == pygame.K_LEFT:
+                if seq[botao_atual]==3:
+                    botao_atual += 1
+                else:
+                    vidas-=1
+                    if vidas==0:
+                        animaperdeu = AnimacaoPerdeu(assets)
+                        all_sprites.add(animaperdeu)
+                        game=False
+                        #fazer animacao para comecar tudo de novo
+                    assets['som de perdeu'].play()
+                    botao_atual=0
+                    animacao.kill()
+                    nivel=1 #volta para o início 
+                    seq = sorteiasequencia(nivel)
+                    animacao=Animacao(assets,seq, fase)
+                    all_sprites.add(animacao)
+            elif event.key == pygame.K_LEFT:
                 botao_verde.kill()
+                if seq[botao_atual]==4:
+                    botao_atual += 1
+                else:
+                    vidas-=1
+                    if vidas==0:
+                        animaperdeu = AnimacaoPerdeu(assets)
+                        all_sprites.add(animaperdeu)
+                        game=False
+                        #fazer animacao para comecar tudo de novo
+                    assets['som de perdeu'].play()
+                    botao_atual=0
+                    animacao.kill()
+                    nivel=1 #volta para o início 
+                    seq = sorteiasequencia(nivel)
+                    animacao=Animacao(assets,seq, fase)
+                    all_sprites.add(animacao)
+        
+            if botao_atual == len(seq):
+                nivel += 1 # passa para o proximo nivel
+                botao_atual = 0
+                seq = sorteiasequencia(nivel) #nova sequencia
+                animacao.kill()
+                animacao = Animacao(assets, seq, fase)#nova animacao
+                all_sprites.add(animacao)
+            
+            if nivel==4:
+                botao_atual=0
+                fase+=1 # passa para a próxima fase
+                nivel=1
+                animacao.kill()
+                mudando_fase = True
+                animacaodefase=Animacaopassadefase(assets)
+                all_sprites.add(animacaodefase)
 
     if mudando_fase and not animacaodefase.alive():
         seq = sorteiasequencia(nivel)
